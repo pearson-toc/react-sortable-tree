@@ -404,6 +404,7 @@ class ReactSortableTree extends Component {
           toggleChildrenVisibility={this.toggleChildrenVisibility}
           scaffoldBlockPxWidth={scaffoldBlockPxWidth}
           {...nodeProps}
+          keyEnter={this.props.onKeyEnter}
         />
       </TreeNodeRenderer>
     );
@@ -589,6 +590,10 @@ ReactSortableTree.propTypes = {
   onVisibilityToggle: PropTypes.func,
 
   dndType: PropTypes.string,
+
+  // Called to handle key enter
+  onKeyEnter: PropTypes.func,
+
 };
 
 ReactSortableTree.defaultProps = {
@@ -613,6 +618,7 @@ ReactSortableTree.defaultProps = {
   searchQuery: null,
   slideRegionSize: 100,
   style: {},
+  onKeyEnter: () => {},
 };
 
 // Export the tree component without the react-dnd DragDropContext,
