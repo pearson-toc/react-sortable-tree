@@ -1678,6 +1678,7 @@
                 _this.hStrength = (0, _reactDndScrollzone.createHorizontalStrength)(slideRegionSize)), 
                 _this.state = {
                     draggingTreeData: null,
+                    selectedNode: null,
                     swapFrom: null,
                     swapLength: null,
                     swapDepth: null,
@@ -1704,6 +1705,7 @@
                     // Load any children defined by a function
                     this.search(nextProps, !1, !1)), // Calculate the rows to be shown from the new tree data
                     this.setState({
+                        selectedNode: null,
                         draggingTreeData: null,
                         swapFrom: null,
                         swapLength: null,
@@ -1789,12 +1791,30 @@
             }, {
                 key: "startDrag",
                 value: function(_ref4) {
-                    var path = _ref4.path, draggingTreeData = (0, _treeDataUtils.removeNodeAtPath)({
-                        treeData: this.props.treeData,
+                    var path = _ref4.path, treeData = this.props.treeData;
+                    if (1 === path.length) {
+                        var parentExpanded = !1;
+                        treeData.forEach(function(node) {
+                            node.expanded && (parentExpanded = !0);
+                        }), parentExpanded && (treeData = (0, _treeDataUtils.toggleExpandedForAll)({
+                            treeData: treeData,
+                            expanded: !1
+                        }), this.props.onChange(treeData));
+                    }
+                    var selectedNode = {
+                        node: (0, _treeDataUtils.getNodeAtPath)({
+                            treeData: treeData,
+                            path: path,
+                            getNodeKey: this.props.getNodeKey
+                        }).node,
+                        path: path
+                    }, draggingTreeData = (0, _treeDataUtils.removeNodeAtPath)({
+                        treeData: treeData,
                         path: path,
                         getNodeKey: this.props.getNodeKey
                     });
                     this.setState({
+                        selectedNode: selectedNode,
                         draggingTreeData: draggingTreeData
                     });
                 }
@@ -1834,7 +1854,9 @@
             }, {
                 key: "endDrag",
                 value: function(dropResult) {
-                    return dropResult && dropResult.node ? void this.moveNode(dropResult) : void this.setState({
+                    return dropResult && dropResult.node ? (this.moveNode(dropResult), void this.setState({
+                        selectedNode: null
+                    })) : void this.setState({
                         draggingTreeData: null,
                         swapFrom: null,
                         swapLength: null,
@@ -1917,12 +1939,14 @@
                         isSearchFocus: isSearchFocus,
                         treeIndex: treeIndex,
                         startDrag: this.startDrag,
+                        dragHover: this.dragHover,
                         endDrag: this.endDrag,
                         canDrag: rowCanDrag,
+                        customCanDrop: canDrop,
                         toggleChildrenVisibility: this.toggleChildrenVisibility,
                         scaffoldBlockPxWidth: scaffoldBlockPxWidth
                     }, nodeProps, {
-                        keyEnter: this.props.onKeyEnter
+                        selectedNode: this.state.selectedNode
                     })));
                 }
             }, {
@@ -2056,9 +2080,7 @@
             canDrop: _propTypes2.default.func,
             // Called after children nodes collapsed or expanded.
             onVisibilityToggle: _propTypes2.default.func,
-            dndType: _propTypes2.default.string,
-            // Called to handle key enter
-            onKeyEnter: _propTypes2.default.func
+            dndType: _propTypes2.default.string
         }, ReactSortableTree.defaultProps = {
             canDrag: !0,
             canDrop: null,
@@ -2080,8 +2102,7 @@
             searchMethod: null,
             searchQuery: null,
             slideRegionSize: 100,
-            style: {},
-            onKeyEnter: function() {}
+            style: {}
         }, // Export the tree component without the react-dnd DragDropContext,
         // for when component is used with other components using react-dnd.
         // see: https://github.com/gaearon/react-dnd/issues/186

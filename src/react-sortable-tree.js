@@ -23,6 +23,8 @@ import {
   insertNode,
   getDescendantCount,
   find,
+  getNodeAtPath,
+  toggleExpandedForAll,
 } from './utils/tree-data-utils';
 import { memoizedInsertNode } from './utils/memoized-tree-data-utils';
 import { swapRows } from './utils/generic-utils';
@@ -66,6 +68,7 @@ class ReactSortableTree extends Component {
 
     this.state = {
       draggingTreeData: null,
+      selectedNode: null,
       swapFrom: null,
       swapLength: null,
       swapDepth: null,
@@ -101,6 +104,7 @@ class ReactSortableTree extends Component {
 
       // Calculate the rows to be shown from the new tree data
       this.setState({
+        selectedNode: null,
         draggingTreeData: null,
         swapFrom: null,
         swapLength: null,
@@ -227,13 +231,39 @@ class ReactSortableTree extends Component {
   }
 
   startDrag({ path }) {
+
+    let treeData = this.props.treeData;
+    
+    if(path.length === 1) {
+      let parentExpanded = false;
+      treeData.forEach((node) => {
+        if(node.expanded) {
+          parentExpanded = true;
+        }
+      });
+      if(parentExpanded) {
+        treeData = toggleExpandedForAll({
+          treeData,
+          expanded: false,
+        })
+        this.props.onChange(treeData);
+      }
+    }
+
+    const selectedNode = { node: getNodeAtPath({
+      treeData,
+      path,
+      getNodeKey: this.props.getNodeKey,
+    }).node, path};
+
     const draggingTreeData = removeNodeAtPath({
-      treeData: this.props.treeData,
+      treeData,
       path,
       getNodeKey: this.props.getNodeKey,
     });
 
     this.setState({
+      selectedNode,
       draggingTreeData,
     });
   }
@@ -286,6 +316,9 @@ class ReactSortableTree extends Component {
     }
 
     this.moveNode(dropResult);
+    this.setState({
+        selectedNode: null,
+    });
   }
 
   /**
@@ -399,12 +432,14 @@ class ReactSortableTree extends Component {
           isSearchFocus={isSearchFocus}
           treeIndex={treeIndex}
           startDrag={this.startDrag}
+          dragHover={this.dragHover}
           endDrag={this.endDrag}
           canDrag={rowCanDrag}
+          customCanDrop={canDrop}
           toggleChildrenVisibility={this.toggleChildrenVisibility}
           scaffoldBlockPxWidth={scaffoldBlockPxWidth}
           {...nodeProps}
-          keyEnter={this.props.onKeyEnter}
+          selectedNode={this.state.selectedNode}
         />
       </TreeNodeRenderer>
     );
@@ -591,9 +626,6 @@ ReactSortableTree.propTypes = {
 
   dndType: PropTypes.string,
 
-  // Called to handle key enter
-  onKeyEnter: PropTypes.func,
-
 };
 
 ReactSortableTree.defaultProps = {
@@ -618,7 +650,6 @@ ReactSortableTree.defaultProps = {
   searchQuery: null,
   slideRegionSize: 100,
   style: {},
-  onKeyEnter: () => {},
 };
 
 // Export the tree component without the react-dnd DragDropContext,
