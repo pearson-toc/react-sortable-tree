@@ -1791,17 +1791,7 @@
             }, {
                 key: "startDrag",
                 value: function(_ref4) {
-                    var path = _ref4.path, treeData = this.props.treeData;
-                    if (1 === path.length) {
-                        var parentExpanded = !1;
-                        treeData.forEach(function(node) {
-                            node.expanded && (parentExpanded = !0);
-                        }), parentExpanded && (treeData = (0, _treeDataUtils.toggleExpandedForAll)({
-                            treeData: treeData,
-                            expanded: !1
-                        }), this.props.onChange(treeData));
-                    }
-                    var selectedNode = {
+                    var path = _ref4.path, treeData = this.props.treeData, selectedNode = {
                         node: (0, _treeDataUtils.getNodeAtPath)({
                             treeData: treeData,
                             path: path,

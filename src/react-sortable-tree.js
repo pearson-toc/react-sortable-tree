@@ -232,24 +232,8 @@ class ReactSortableTree extends Component {
 
   startDrag({ path }) {
 
-    let treeData = this.props.treeData;
+    const treeData = this.props.treeData;
     
-    if(path.length === 1) {
-      let parentExpanded = false;
-      treeData.forEach((node) => {
-        if(node.expanded) {
-          parentExpanded = true;
-        }
-      });
-      if(parentExpanded) {
-        treeData = toggleExpandedForAll({
-          treeData,
-          expanded: false,
-        })
-        this.props.onChange(treeData);
-      }
-    }
-
     const selectedNode = { node: getNodeAtPath({
       treeData,
       path,
