@@ -1987,6 +1987,7 @@
                     list = rows.map(function(row, index) {
                         return _this3.renderRow(row, index, {
                             height: "function" != typeof rowHeight ? rowHeight : rowHeight({
+                                row: row,
                                 index: index
                             })
                         }, function() {
